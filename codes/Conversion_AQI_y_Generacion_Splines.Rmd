@@ -1,0 +1,1665 @@
+---
+title: "prueba"
+author: "Ricardo Camacho Castillo"
+date: "2022-09-19"  
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("readxl")
+library(openair)
+library(dplyr)
+library(hash)
+library(tidyverse)
+library(hrbrthemes)
+library("reshape2")
+library(stats)
+library(dplyr)
+library(corrplot)
+library(readxl)
+library(openair)
+library(dplyr)
+library(hash)
+library(tidyverse)
+library(hrbrthemes)
+library(reshape2)
+library(splines)
+library(Ecdat)
+
+```
+
+```{r}
+all_data <- read.csv("all_data.csv")
+pollu_data <- read.csv("pollu_data.csv")
+meteo_data <- read.csv("meteo_data.csv")
+
+all_data <- all_data %>% rename(date = ï..date)
+pollu_data <- pollu_data %>% rename(date = ï..date)
+meteo_data <- meteo_data %>% rename(date = ï..date)
+
+attach(all_data)
+```
+
+
+```{r}
+all_data$date <- as.POSIXct(all_data$date, tz = "UTC")
+pollu_data$date <- as.POSIXct(pollu_data$date, tz = "UTC")
+meteo_data$date <- as.POSIXct(meteo_data$date, tz = "UTC")
+
+all_data
+
+
+max_year <- max(format(all_data$date, format="%Y"))
+min_year <- min(format(all_data$date, format="%Y"))
+```
+
+```{r}
+all_data$date2 <- format(all_data$date, format = "%Y")
+
+WS_datos <- all_data[all_data$date2 == "2018" | all_data$date2 == "2020",]
+x <- 1:length(WS_datos$WS)
+
+
+WS_datos <- data.frame(WS_datos$WS)
+WS_datos <- WS_datos %>% rename(y = WS_datos.WS)
+
+WS_datos$x <- x
+
+
+modelWS <- lm(y~bs(x,knots = c(seq(from = 1,to =length(WS_datos$x),by = 2192))),data = WS_datos)
+inv2lims <- range(WS_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_WS <- predict(modelWS,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+WD_datos <- all_data[all_data$date2 == "2018" | all_data$date2 == "2020",]
+x <- 1:length(WD_datos$WD)
+
+
+WD_datos <- data.frame(WD_datos$WD)
+WD_datos <- WD_datos %>% rename(y = WD_datos.WD)
+
+WD_datos$x <- x
+
+
+modelWD <- lm(y~bs(x,knots = c(seq(from = 1,to =length(WD_datos$x),by = 2192))),data = WD_datos)
+inv2lims <- range(WD_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_WD <- predict(modelWD,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+O3_datos <- all_data[all_data$date2 == "2017" | all_data$date2 == "2020",]
+x <- 1:length(O3_datos$O3)
+
+
+O3_datos <- data.frame(O3_datos$O3)
+O3_datos <- O3_datos %>% rename(y = O3_datos.O3)
+
+O3_datos$x <- x
+
+
+modelO3 <- lm(y~bs(x,knots = c(seq(from = 1,to =length(O3_datos$x),by = 2192))),data = O3_datos)
+inv2lims <- range(O3_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_O3 <- predict(modelO3,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+NOx_datos <- all_data[all_data$date2 == "2017" | all_data$date2 == "2020",]
+x <- 1:length(NOx_datos$NOx)
+
+
+NOx_datos <- data.frame(NOx_datos$NOx)
+NOx_datos <- NOx_datos %>% rename(y = NOx_datos.NOx)
+
+NOx_datos$x <- x
+
+
+modelNOx <- lm(y~bs(x,knots = c(seq(from = 1,to =length(NOx_datos$x),by = 2192))),data = NOx_datos)
+inv2lims <- range(NOx_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_NOx <- predict(modelNOx,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+NO2_datos <- all_data[all_data$date2 == "2017" | all_data$date2 == "2020",]
+x <- 1:length(NO2_datos$NO2)
+
+
+NO2_datos <- data.frame(NO2_datos$NO2)
+NO2_datos <- NO2_datos %>% rename(y = NO2_datos.NO2)
+
+NO2_datos$x <- x
+
+
+modelNO2 <- lm(y~bs(x,knots = c(seq(from = 1,to =length(NO2_datos$x),by = 2192))),data = NO2_datos)
+inv2lims <- range(NO2_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_NO2 <- predict(modelNO2,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+NO_datos <- all_data[all_data$date2 == "2017" | all_data$date2 == "2020",]
+x <- 1:length(NO_datos$NO)
+
+
+NO_datos <- data.frame(NO_datos$NO)
+NO_datos <- NO_datos %>% rename(y = NO_datos.NO)
+
+NO_datos$x <- x
+
+
+modelNO <- lm(y~bs(x,knots = c(seq(from = 1,to =length(NO_datos$x),by = 2192))),data = NO_datos)
+inv2lims <- range(NO_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_NO <- predict(modelNO,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+CO_datos <- all_data[all_data$date2 == "2017" | all_data$date2 == "2020",]
+x <- 1:length(CO_datos$CO)
+
+
+CO_datos <- data.frame(CO_datos$CO)
+CO_datos <- CO_datos %>% rename(y = CO_datos.CO)
+
+CO_datos$x <- x
+
+
+modelCO <- lm(y~bs(x,knots = c(seq(from = 1,to =length(CO_datos$x),by = 2192))),data = CO_datos)
+inv2lims <- range(CO_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_CO <- predict(modelCO,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+TOUT_datos <- all_data[all_data$date2 == "2018" | all_data$date2 == "2020",]
+x <- 1:length(TOUT_datos$TOUT)
+
+
+TOUT_datos <- data.frame(TOUT_datos$TOUT)
+TOUT_datos <- TOUT_datos %>% rename(y = TOUT_datos.TOUT)
+
+TOUT_datos$x <- x
+
+
+modelTOUT <- lm(y~bs(x,knots = c(seq(from = 1,to =length(TOUT_datos$x),by = 2192))),data = TOUT_datos)
+inv2lims <- range(TOUT_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_TOUT <- predict(modelTOUT,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+SR_datos <- all_data[all_data$date2 == "2018" | all_data$date2 == "2020",]
+x <- 1:length(SR_datos$SR)
+
+
+SR_datos <- data.frame(SR_datos$SR)
+SR_datos <- SR_datos %>% rename(y = SR_datos.SR)
+
+SR_datos$x <- x
+
+
+modelSR <- lm(y~bs(x,knots = c(seq(from = 1,to =length(SR_datos$x),by = 2192))),data = SR_datos)
+inv2lims <- range(SR_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_SR <- predict(modelSR,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+SO2_datos <- all_data[all_data$date2 == "2019" | all_data$date2 == "2020",]
+x <- 1:length(SO2_datos$SO2)
+
+
+SO2_datos <- data.frame(SO2_datos$SO2)
+SO2_datos <- SO2_datos %>% rename(y = SO2_datos.SO2)
+
+SO2_datos$x <- x
+
+
+modelSO2 <- lm(y~bs(x,knots = c(seq(from = 1,to =length(SO2_datos$x),by = 2192))),data = SO2_datos)
+inv2lims <- range(SO2_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_SO2 <- predict(modelSO2,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+RH_datos <- all_data[all_data$date2 == "2018" | all_data$date2 == "2020",]
+x <- 1:length(RH_datos$RH)
+
+
+RH_datos <- data.frame(RH_datos$RH)
+RH_datos <- RH_datos %>% rename(y = RH_datos.RH)
+
+RH_datos$x <- x
+
+
+modelRH <- lm(y~bs(x,knots = c(seq(from = 1,to =length(RH_datos$x),by = 2192))),data = RH_datos)
+inv2lims <- range(RH_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_RH <- predict(modelRH,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+RAINF_datos <- all_data[all_data$date2 == "2018" | all_data$date2 == "2020",]
+x <- 1:length(RAINF_datos$RAINF)
+
+
+RAINF_datos <- data.frame(RAINF_datos$RAINF)
+RAINF_datos <- RAINF_datos %>% rename(y = RAINF_datos.RAINF)
+
+RAINF_datos$x <- x
+
+
+modelRAINF <- lm(y~bs(x,knots = c(seq(from = 1,to =length(RAINF_datos$x),by = 2192))),data = RAINF_datos)
+inv2lims <- range(RAINF_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_RAINF <- predict(modelRAINF,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+PRS_datos <- all_data[all_data$date2 == "2018" | all_data$date2 == "2020",]
+x <- 1:length(PRS_datos$PRS)
+
+
+PRS_datos <- data.frame(PRS_datos$PRS)
+PRS_datos <- PRS_datos %>% rename(y = PRS_datos.PRS)
+
+PRS_datos$x <- x
+
+
+modelPRS <- lm(y~bs(x,knots = c(seq(from = 1,to =length(PRS_datos$x),by = 2192))),data = PRS_datos)
+inv2lims <- range(PRS_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_PRS <- predict(modelPRS,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+PM10_datos <- all_data[all_data$date2 == "2017" | all_data$date2 == "2020",]
+x <- 1:length(PM10_datos$PM10)
+
+
+PM10_datos <- data.frame(PM10_datos$PM10)
+PM10_datos <- PM10_datos %>% rename(y = PM10_datos.PM10)
+
+PM10_datos$x <- x
+
+
+modelPM10 <- lm(y~bs(x,knots = c(seq(from = 1,to =length(PM10_datos$x),by = 2192))),data = PM10_datos)
+inv2lims <- range(PM10_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_PM10 <- predict(modelPM10,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+PM2_5_datos <- all_data[all_data$date2 == "2019" | all_data$date2 == "2020",]
+x <- 1:length(PM2_5_datos$PM2_5)
+
+
+PM2_5_datos <- data.frame(PM2_5_datos$PM2_5)
+PM2_5_datos <- PM2_5_datos %>% rename(y = PM2_5_datos.PM2_5)
+
+PM2_5_datos$x <- x
+
+
+modelPM2_5 <- lm(y~bs(x,knots = c(seq(from = 1,to =length(PM2_5_datos$x),by = 2192))),data = PM2_5_datos)
+inv2lims <- range(PM2_5_datos$x)
+inv2.grid <- seq(from= inv2lims[1], to = inv2lims[2])
+pred_PM2_5 <- predict(modelPM2_5,newdata = list(inv2=inv2.grid),se=T)
+##################################################################
+```
+```{r}
+j = 1
+k = 1
+for (i in 1:length(all_data$PM2_5)){
+  
+  if (is.na(all_data$PM2_5[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$PM2_5[i] = pred_PM2_5$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$PM2_5[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$PM2_5[i] = pred_PM2_5$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$PM2_5[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$PM2_5[i] = pred_PM2_5$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$PM2_5[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$PM2_5[i] = pred_PM2_5$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$PM2_5[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$PM2_5[i] = pred_PM2_5$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$PM10)){
+  
+  if (is.na(all_data$PM10[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$PM10[i] = pred_PM10$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$PM10[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$PM10[i] = pred_PM10$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$PM10[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$PM10[i] = pred_PM10$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$PM10[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$PM10[i] = pred_PM10$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$PM10[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$PM10[i] = pred_PM10$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$SO2)){
+  
+  if (is.na(all_data$SO2[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$SO2[i] = pred_SO2$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$SO2[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$SO2[i] = pred_SO2$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$SO2[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$SO2[i] = pred_SO2$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$SO2[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$SO2[i] = pred_SO2$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$SO2[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$SO2[i] = pred_SO2$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$O3)){
+  
+  if (is.na(all_data$O3[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$O3[i] = pred_O3$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$O3[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$O3[i] = pred_O3$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$O3[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$O3[i] = pred_O3$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$O3[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$O3[i] = pred_O3$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$O3[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$O3[i] = pred_O3$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$CO)){
+  
+  if (is.na(all_data$CO[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$CO[i] = pred_CO$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$CO[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$CO[i] = pred_CO$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$CO[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$CO[i] = pred_CO$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$CO[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$CO[i] = pred_CO$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$CO[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$CO[i] = pred_CO$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$NO)){
+  
+  if (is.na(all_data$NO[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$NO[i] = pred_NO$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$NO[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$NO[i] = pred_NO$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$NO[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$NO[i] = pred_NO$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$NO[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$NO[i] = pred_NO$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$NO[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$NO[i] = pred_NO$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$NO2)){
+  
+  if (is.na(all_data$NO2[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$NO2[i] = pred_NO2$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$NO2[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$NO2[i] = pred_NO2$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$NO2[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$NO2[i] = pred_NO2$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$NO2[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$NO2[i] = pred_NO2$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$NO2[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$NO2[i] = pred_NO2$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$NOx)){
+  
+  if (is.na(all_data$NOx[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$NOx[i] = pred_NOx$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$NOx[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$NOx[i] = pred_NOx$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$NOx[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$NOx[i] = pred_NOx$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$NOx[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$NOx[i] = pred_NOx$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$NOx[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$NOx[i] = pred_NOx$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$RAINF)){
+  
+  if (is.na(all_data$RAINF[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$RAINF[i] = pred_RAINF$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$RAINF[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$RAINF[i] = pred_RAINF$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$RAINF[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$RAINF[i] = pred_RAINF$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$RAINF[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$RAINF[i] = pred_RAINF$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$RAINF[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$RAINF[i] = pred_RAINF$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$SR)){
+  
+  if (is.na(all_data$SR[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$SR[i] = pred_SR$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$SR[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$SR[i] = pred_SR$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$SR[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$SR[i] = pred_SR$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$SR[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$SR[i] = pred_SR$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$SR[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$SR[i] = pred_SR$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$RH)){
+  
+  if (is.na(all_data$RH[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$RH[i] = pred_RH$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$RH[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$RH[i] = pred_RH$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$RH[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$RH[i] = pred_RH$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$RH[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$RH[i] = pred_RH$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$RH[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$RH[i] = pred_RH$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$TOUT)){
+  
+  if (is.na(all_data$TOUT[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$TOUT[i] = pred_TOUT$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$TOUT[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$TOUT[i] = pred_TOUT$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$TOUT[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$TOUT[i] = pred_TOUT$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$TOUT[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$TOUT[i] = pred_TOUT$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$TOUT[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$TOUT[i] = pred_TOUT$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$PRS)){
+  
+  if (is.na(all_data$PRS[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$PRS[i] = pred_PRS$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$PRS[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$PRS[i] = pred_PRS$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$PRS[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$PRS[i] = pred_PRS$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$PRS[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$PRS[i] = pred_PRS$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$PRS[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$PRS[i] = pred_PRS$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$WS)){
+  
+  if (is.na(all_data$WS[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$WS[i] = pred_WS$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$WS[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$WS[i] = pred_WS$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$WS[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$WS[i] = pred_WS$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$WS[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$WS[i] = pred_WS$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$WS[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$WS[i] = pred_WS$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+
+
+j = 1
+k = 1
+for (i in 1:length(all_data$WD)){
+  
+  if (is.na(all_data$WD[i]) & all_data$date2[i] == "2017"){
+    
+    all_data$WD[i] = pred_WD$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$WD[i]) & all_data$date2[i] == "2018"){
+    
+    all_data$WD[i] = pred_WD$fit[[i]]
+    
+  } 
+  
+  if (is.na(all_data$WD[i]) & all_data$date2[i] == "2019"){
+    
+    all_data$WD[i] = pred_WD$fit[[j]]
+    
+  } 
+  
+  if (is.na(all_data$WD[i]) & all_data$date2[i] == "2020"){
+    
+    all_data$WD[i] = pred_WD$fit[[k]]
+    
+  }
+  
+  if (is.na(all_data$WD[i]) & all_data$date2[i] == "2021"){
+    
+    all_data$WD[i] = pred_WD$fit[[k]]
+  
+  }
+  
+  if(all_data$date2[i] == "2019" || all_data$date2[i] == "2019"){
+    
+    j = j + 1
+    
+  }
+  
+  if (all_data$date2[i] == "2021"){
+    
+    k = k + 1
+    
+  }
+  
+}
+
+```
+
+```{r}
+
+conversion_OMS <- function(presion, temperatura, masaMolecular, ppm){
+  
+  unidadOMS = (presion * masaMolecular * ppm) / (62.4 * (273.2 + temperatura))
+  return(unidadOMS)
+  
+}
+
+```
+
+```{r}
+PM2_5loRanges = c(0.0,12.1,35.5,55.5,150.5,250.5)
+PM2_5hiRanges = c(12.0,35.4,55.4,150.4,250.4,500.4)
+
+
+AQIPM2_5loRanges = c(0,51,101,151,201,301)
+AQIPM2_5hiRanges = c(50,100,150,200,300,500)
+
+all_data$AQI_PM2_5 <- NA
+all_data$AQI_PM2_5_cualitativo <- NA
+
+for (i in 1:length(all_data[[1]])){
+  
+  for (j in 1:length(PM2_5loRanges)){
+    
+    if (all_data$PM2_5[i] >= PM2_5loRanges[j] & all_data$PM2_5[i] <= PM2_5hiRanges[j]){
+      
+      index = j
+      break
+      
+    }
+    
+  }
+  
+  all_data$AQI_PM2_5[i] <- (((all_data$PM2_5[i] - PM2_5loRanges[index])*(AQIPM2_5hiRanges[index] - AQIPM2_5loRanges[index])) / (PM2_5hiRanges[index] - PM2_5loRanges[index])) + AQIPM2_5loRanges[index]
+ 
+  if (index == 1){
+    
+    all_data$AQI_PM2_5_cualitativo[i] <- 0  
+    
+  }
+  
+  if (index == 2){
+    
+    all_data$AQI_PM2_5_cualitativo[i] <- 1  
+    
+  }
+  
+  if (index == 3){
+    
+    all_data$AQI_PM2_5_cualitativo[i] <- 2  
+    
+  }
+  
+  if (index == 4){
+    
+    all_data$AQI_PM2_5_cualitativo[i] <- 3  
+    
+  }
+  
+  
+  if (index == 5){
+    
+    all_data$AQI_PM2_5_cualitativo[i] <- 4  
+    
+  }
+  
+  
+  if (index == 6){
+    
+    all_data$AQI_PM2_5_cualitativo[i] <- 5  
+    
+  }
+  
+  
+}
+
+
+
+
+
+PM10loRanges = c(0.0,55.0,155.0,255.0,355.0,425.0)
+PM10hiRanges = c(54.0,154,254.0,354.0,424.0,604.0)
+
+
+AQIPM10loRanges = c(0,51,101,151,201,301)
+AQIPM10hiRanges = c(50,100,150,200,300,500)
+
+all_data$AQI_PM10 <- NA
+all_data$AQI_PM10_cualitativo <- NA
+
+for (i in 1:length(all_data[[1]])){
+  
+  for (j in 1:length(PM10loRanges)){
+    
+    if (all_data$PM10[i] >= PM10loRanges[j] & all_data$PM10[i] <= PM10hiRanges[j]){
+      
+      index = j
+      break
+      
+    }
+    
+  }
+  
+  all_data$AQI_PM10[i] <- (((all_data$PM10[i] - PM10loRanges[index])*(AQIPM10hiRanges[index] - AQIPM10loRanges[index])) / (PM10hiRanges[index] - PM10loRanges[index])) + AQIPM10loRanges[index]
+ 
+  if (index == 1){
+    
+    all_data$AQI_PM10_cualitativo[i] <- 0  
+    
+  }
+  
+  if (index == 2){
+    
+    all_data$AQI_PM10_cualitativo[i] <- 1  
+    
+  }
+  
+  if (index == 3){
+    
+    all_data$AQI_PM10_cualitativo[i] <- 2  
+    
+  }
+  
+  if (index == 4){
+    
+    all_data$AQI_PM10_cualitativo[i] <- 3  
+    
+  }
+  
+  
+  if (index == 5){
+    
+    all_data$AQI_PM10_cualitativo[i] <- 4  
+    
+  }
+  
+  
+  if (index == 6){
+    
+    all_data$AQI_PM10_cualitativo[i] <- 5  
+    
+  }
+  
+  if(all_data$AQI_PM10[i] >= 500){
+    
+    all_data$AQI_PM10_cualitativo[i] <- 5
+    
+  }
+  
+}
+
+
+
+all_data$SO2 <- (all_data$PRS * 64.066 * (all_data$SO2 / 1000)) / (62.4 * (273.2 + all_data$TOUT))
+
+SO2loRanges = c(0.0/1000,36/1000,76/1000,186/1000,305/1000,605/1000)
+SO2hiRanges = c(35/1000,75/1000,185/1000,304/1000,604/1000,1004/1000)
+
+
+AQISO2loRanges = c(0,51,101,151,201,301)
+AQISO2hiRanges = c(50,100,150,200,300,500)
+
+all_data$AQI_SO2 <- NA
+all_data$AQI_SO2_cualitativo <- NA
+
+for (i in 1:length(all_data[[1]])){
+  
+  for (j in 1:length(SO2loRanges)){
+    
+    if (all_data$SO2[i] >= conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 64.066, SO2loRanges[j]) & all_data$SO2[i] <= conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 64.066, SO2hiRanges[j])){
+      
+      index = j
+      break
+      
+    }
+    
+  }
+  
+  all_data$AQI_SO2[i] <- (((all_data$SO2[i] - conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 64.066, SO2loRanges[index]))*(AQISO2hiRanges[index] - AQISO2loRanges[index])) / (conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 64.066, SO2hiRanges[index]) - conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 64.066, SO2loRanges[index]))) + AQISO2loRanges[index]
+ 
+  if (index == 1){
+    
+    all_data$AQI_SO2_cualitativo[i] <- 0  
+    
+  }
+  
+  if (index == 2){
+    
+    all_data$AQI_SO2_cualitativo[i] <- 1  
+    
+  }
+  
+  if (index == 3){
+    
+    all_data$AQI_SO2_cualitativo[i] <- 2  
+    
+  }
+  
+  if (index == 4){
+    
+    all_data$AQI_SO2_cualitativo[i] <- 3  
+    
+  }
+  
+  
+  if (index == 5){
+    
+    all_data$AQI_SO2_cualitativo[i] <- 4  
+    
+  }
+  
+  
+  if (index == 6){
+    
+    all_data$AQI_SO2_cualitativo[i] <- 5  
+    
+  }
+  
+  
+}
+
+
+
+all_data$O3 <- (all_data$PRS * 48 * (all_data$O3 / 1000)) / (62.4 * (273.2 + all_data$TOUT))
+
+O3loRanges = c(0.0,0.055,0.071,0.086,0.106)
+O3hiRanges = c(0.054,0.070,0.085,0.105,0.200)
+
+
+AQIO3loRanges = c(0,51,101,151,201,301)
+AQIO3hiRanges = c(50,100,150,200,300,500)
+
+all_data$AQI_O3 <- NA
+all_data$AQI_O3_cualitativo <- NA
+
+for (i in 1:length(all_data[[1]])){
+  
+  for (j in 1:length(O3loRanges)){
+    
+    if (all_data$O3[i] >= conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 48, O3loRanges[j]) & all_data$O3[i] <= conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 48, O3hiRanges[j])){
+      
+      index = j
+      break
+      
+    }
+    
+  }
+  
+  all_data$AQI_O3[i] <- (((all_data$O3[i] - conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 48, O3loRanges[index]))*(AQIO3hiRanges[index] - AQIO3loRanges[index])) / (conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 48, O3hiRanges[index]) - conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 48, O3loRanges[index]))) + AQIO3loRanges[index]
+ 
+  if (index == 1){
+    
+    all_data$AQI_O3_cualitativo[i] <- 0  
+    
+  }
+  
+  if (index == 2){
+    
+    all_data$AQI_O3_cualitativo[i] <- 1  
+    
+  }
+  
+  if (index == 3){
+    
+    all_data$AQI_O3_cualitativo[i] <- 2  
+    
+  }
+  
+  if (index == 4){
+    
+    all_data$AQI_O3_cualitativo[i] <- 3  
+    
+  }
+  
+  
+  if (index == 5){
+    
+    all_data$AQI_O3_cualitativo[i] <- 4  
+    
+  }
+  
+  
+  if (index == 6){
+    
+    all_data$AQI_O3_cualitativo[i] <- 5  
+    
+  }
+  
+  
+}
+
+
+
+all_data$CO <- (all_data$PRS * 28.01 * (all_data$CO)) / (62.4 * (273.2 + all_data$TOUT))
+
+COloRanges = c(0.0,4.5,9.5,12.5,15.5,30.5)
+COhiRanges = c(4.4,9.4,12.4,15.4,30.4,50.4)
+
+
+AQICOloRanges = c(0,51,101,151,201,301)
+AQICOhiRanges = c(50,100,150,200,300,500)
+
+all_data$AQI_CO <- NA
+all_data$AQI_CO_cualitativo <- NA
+
+for (i in 1:length(all_data[[1]])){
+  
+  for (j in 1:length(COloRanges)){
+    
+    if (all_data$CO[i] >= conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 28.01, COloRanges[j]) & all_data$CO[i] <= conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 28.01, COhiRanges[j])){
+      
+      index = j
+      break
+      
+    }
+    
+  }
+  
+  all_data$AQI_CO[i] <- (((all_data$CO[i] - conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 28.01, COloRanges[index]))*(AQICOhiRanges[index] - AQICOloRanges[index])) / (conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 28.01, COhiRanges[index]) - conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 28.01, COloRanges[index]))) + AQICOloRanges[index]
+ 
+  if (index == 1){
+    
+    all_data$AQI_CO_cualitativo[i] <- 0  
+    
+  }
+  
+  if (index == 2){
+    
+    all_data$AQI_CO_cualitativo[i] <- 1  
+    
+  }
+  
+  if (index == 3){
+    
+    all_data$AQI_CO_cualitativo[i] <- 2  
+    
+  }
+  
+  if (index == 4){
+    
+    all_data$AQI_CO_cualitativo[i] <- 3  
+    
+  }
+  
+  
+  if (index == 5){
+    
+    all_data$AQI_CO_cualitativo[i] <- 4  
+    
+  }
+  
+  
+  if (index == 6){
+    
+    all_data$AQI_CO_cualitativo[i] <- 5  
+    
+  }
+  
+  
+}
+
+
+
+
+all_data$NO2 <- (all_data$PRS * 46.0055 * (all_data$NO2 / 1000)) / (62.4 * (273.2 + all_data$TOUT))
+
+NO2loRanges = c(0.0 / 1000,54 / 1000,101 / 1000,361 / 1000,650 / 1000,1250 / 1000)
+NO2hiRanges = c(53 / 1000,100 / 1000,360 / 1000,649 / 1000,1249 / 1000,2049 / 1000)
+
+
+AQINO2loRanges = c(0,51,101,151,201,301)
+AQINO2hiRanges = c(50,100,150,200,300,500)
+
+all_data$AQI_NO2 <- NA
+all_data$AQI_NO2_cualitativo <- NA
+
+for (i in 1:length(all_data[[1]])){
+  
+  for (j in 1:length(NO2loRanges)){
+    
+    if (all_data$NO2[i] >= conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 46.0055, NO2loRanges[j]) & all_data$NO2[i] <= conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 46.0055, NO2hiRanges[j])){
+      
+      index = j
+      break
+      
+    }
+    
+  }
+  
+  all_data$AQI_NO2[i] <- (((all_data$NO2[i] - conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 46.0055, NO2loRanges[index]))*(AQINO2hiRanges[index] - AQINO2loRanges[index])) / (conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 46.0055, NO2hiRanges[index]) - conversion_OMS(all_data$PRS[i], all_data$TOUT[i], 46.0055, NO2loRanges[index]))) + AQINO2loRanges[index]
+ 
+  if (index == 1){
+    
+    all_data$AQI_NO2_cualitativo[i] <- 0  
+    
+  }
+  
+  if (index == 2){
+    
+    all_data$AQI_NO2_cualitativo[i] <- 1  
+    
+  }
+  
+  if (index == 3){
+    
+    all_data$AQI_NO2_cualitativo[i] <- 2  
+    
+  }
+  
+  if (index == 4){
+    
+    all_data$AQI_NO2_cualitativo[i] <- 3  
+    
+  }
+  
+  
+  if (index == 5){
+    
+    all_data$AQI_NO2_cualitativo[i] <- 4  
+    
+  }
+  
+  
+  if (index == 6){
+    
+    all_data$AQI_NO2_cualitativo[i] <- 5  
+    
+  }
+  
+  
+}
+
+
+```
+
+```{r}
+
+all_data$date2 <- NULL
+
+write.csv(all_data,"all_data_spline_AQI.csv")
+
+```
+
+```{r}
+pollu_2018 <- selectByDate(pollu_data, year = 2018)
+numeric_data <- select_if(all_data, is.numeric)
+column_names <- colnames(select_if(all_data, is.numeric))
+for (i in column_names) {
+  print(i)
+}
+
+pm2_5_long <- melt(subset(na.omit(all_data), select = "PM2_5"))
+pm10_long <- melt(subset(na.omit(all_data), select = "PM10"))
+so2_long <- melt(subset(na.omit(all_data), select = "SO2"))
+o3_long <- melt(subset(na.omit(all_data), select = "O3"))
+co_long <- melt(subset(na.omit(all_data), select = "PM10"))
+no_long <- melt(subset(na.omit(all_data), select = "PM10"))
+no2_long <- melt(subset(na.omit(all_data), select = "PM10"))
+nox_long <- melt(subset(na.omit(all_data), select = "PM10"))
+rainf_long <- melt(subset(na.omit(all_data), select = "PM10"))
+sr_long <- melt(subset(na.omit(all_data), select = "PM10"))
+rh_long <- melt(subset(na.omit(all_data), select = "PM10"))
+tout_long <- melt(subset(na.omit(all_data), select = "PM10"))
+prs_long <- melt(subset(na.omit(all_data), select = "PRS"))
+ws_long <- melt(subset(na.omit(all_data), select = "WS"))
+wd_long <- melt(subset(na.omit(all_data), select = "WD"))
+
+
+
+
+ggplot(pm10_long, aes(x=variable, y=value, fill=variable)) + 
+    geom_boxplot(alpha=0.3) +
+    theme(legend.position="none")
+
+
+
+```
+
+```{r}
+numeric_data <- select_if(all_data, is.numeric)
+
+all_data_long <- melt(subset(na.omit(numeric_data)))
+
+
+p <- ggplot(data = all_data_long, aes(x=variable, y=value)) + 
+             geom_boxplot(aes(fill=variable))
+
+p <-p + facet_wrap( ~ variable, scales="free")
+p
+
+ggsave("boxplots.pdf")
+ggsave(path = "figs", filename = "fig1.png")
+
+```
+
+
+
+```{r}
+
+
+for (i in min_year:max_year) {
+  df <- selectByDate(pollu_data, 
+                    year = i
+        )
+  summaryPlot(df, main = paste("Pollu Año", i))
+  
+  df <- selectByDate(meteo_data, 
+                    year = i
+        )
+  summaryPlot(df, main = paste("Meteo Año", i))
+
+}
+
+
+```
+
+
+
+```{r}
+pollu_2017$date = as.POSIXct(pollu_2017$date, tz = "UTC")
+pollu_2018$date = as.POSIXct(pollu_2018$date, tz = "UTC")
+pollu_2019$date = as.POSIXct(pollu_2019$date, tz = "UTC")
+pollu_2020$date = as.POSIXct(pollu_2020$date, tz = "UTC")
+pollu_2021$date = as.POSIXct(pollu_2021$date, tz = "UTC")
+
+
+plot.ts(subset(pollu_2017,select= -date),col="blue")
+plot.ts(subset(pollu_2018,select= -date),col="blue")
+plot.ts(subset(pollu_2019,select= -date),col="blue")
+plot.ts(subset(pollu_2020,select= -date),col="blue")
+plot.ts(subset(pollu_2021,select= -date),col="blue")
+
+
+```
+```{r}
+pollu <- hash()
+pollu[["2017"]] <- pollu_2017
+pollu[["2018"]] <- pollu_2018
+pollu[["2019"]] <- pollu_2019
+pollu[["2020"]] <- pollu_2020
+pollu[["2021"]] <- pollu_2021
+
+
+for (i in keys(pollu)) {
+  df = as.data.frame(pollu[[i]])
+  timeVariation (df, pollutant = c ("PM10", "PM2_5"), statistic = "mean", main = paste("Year", i, sep=" ")) 
+  timeVariation (df, pollutant = c ("NO", "NO2", "NOx"), statistic = "mean", main = paste("Year", i, sep=" ")) 
+  timeVariation (df, pollutant = c ("SO2", "O3", "CO"), statistic = "mean", main = paste("Year", i, sep=" ")) 
+
+}
+```
+
+
+```{r}
+timeVariation (pollu_2018, pollutant = c ("PM10", "PM2_5"), statistic = "mean") 
+timeVariation (pollu_2018, pollutant = c ("NO", "NO2", "NOx"), statistic = "mean") 
+timeVariation (pollu_2018, pollutant = c ("SO2", "O3", "CO"), statistic = "mean", main = "PM2.5 a in 2020") 
+```
+
+
+```{r}
+calendarPlot(pollu_2020, pollutant = "PM2_5") #pollutantParameter selección mostrar nombre de variable
+```
+
+```{r}
+
+breaks <- c(c(0,25,45,79,147,230), c(0,25,45))
+column_names = colnames(select_if(all_data, is.numeric))
+for (i in column_names) {
+  print(i)
+}
+```
+
+
+```{r}
+breaks <- c(0,25,45,79,147,230)
+labels <- c("Buena","Aceptable","Mala","Muy mala","Extremadamente mala")
+cols=c("green","yellow","orange","red","purple")
+column_names = colnames(select_if(all_data, is.numeric))
+
+for (i in column_names) {
+  
+  for (j in min_year:max_year) {
+    df <- selectByDate(all_data, 
+                      year = j
+          )
+    calendarPlot (df, pollutant = i, breaks = breaks, labels = labels, cols = cols, statistic = "mean", main = paste("Daily", i, "in", j)) 
+  }
+}
+
+
+```
+
+```{r}
+summaryPlot(pollu_2020)
+```
+
+
+
+
+
+
+```{r}
+all_2019 <- selectByDate(all_data, 
+                    year = "2019"
+                    )
+
+windRose(all_data ,ws = "WS", wd = "WD", type = 'year')
+```
+
+
+
+
+
+
+
+
+

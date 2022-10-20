@@ -1,0 +1,37 @@
+---
+title: "reto 1.1"
+author: "Nc"
+date: "2022-10-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(dplyr)
+library(psych)
+library(GGally)
+library(ggplot2)
+library(gridExtra)
+library(lmtest)
+library(corrplot)
+library(car)
+```
+```{r}
+datos <- read.csv("baseoriginal.csv", header=1)
+attach(datos)
+```
+```{r}
+cov <- cov(select_if(datos, is.numeric))
+table(cov)
+View(cov)
+```
+```{r}
+datos
+```
+
+```{r}
+multi.hist(x=select_if(datos, is.numeric), dcol = c("blue", "red"), dlty = c("dotted","solid"), globa = F)
+```
+
